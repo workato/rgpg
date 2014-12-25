@@ -31,6 +31,7 @@ module Rgpg
           '--keyring', keyring_file_name,
           '--output', output_file_name,
           '--encrypt',
+          '--armor',
           '--recipient', recipient,
           '--yes',
           '--trust-model', 'always',
