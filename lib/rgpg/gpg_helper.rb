@@ -35,6 +35,7 @@ module Rgpg
           '--recipient', recipient,
           '--yes',
           '--trust-model', 'always',
+          '--no-tty',
           input_file_name
         )
       end
@@ -53,6 +54,7 @@ module Rgpg
                '--decrypt',
                '--yes',
                '--trust-model', 'always',
+               '--no-tty',
                input_file_name
         args.unshift '--passphrase', passphrase unless passphrase.nil?
         run_gpg_capture(*args)
