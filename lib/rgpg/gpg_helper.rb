@@ -21,13 +21,14 @@ module Rgpg
       end
     end
 
-    def self.encrypt_file(public_key_file_name, input_file_name, output_file_name)
+    def self.encrypt_file(public_key_file_name, input_file_name, output_file_name, **options)
       raise ArgumentError.new("Public key file \"#{public_key_file_name}\" does not exist") unless File.exist?(public_key_file_name)
       raise ArgumentError.new("Input file \"#{input_file_name}\" does not exist") unless File.exist?(input_file_name)
 
       recipient = get_recipient(public_key_file_name)
       with_temporary_encrypt_keyring(public_key_file_name) do |keyring_file_name|
         run_gpg_capture(
+          *options.map { |k, v| ["--#{k.to_s.gsub('_', '-')}", v ] }.flatten,
           '--keyring', keyring_file_name,
           '--output', output_file_name,
           '--encrypt',
