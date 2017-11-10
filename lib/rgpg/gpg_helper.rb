@@ -21,13 +21,19 @@ module Rgpg
       end
     end
 
-    def self.encrypt_file(public_key_file_name, input_file_name, output_file_name)
+    def self.encrypt_file(public_key_file_name, input_file_name, output_file_name, cipher_algo: nil, digest_algo: nil, compress_algo: nil)
       raise ArgumentError.new("Public key file \"#{public_key_file_name}\" does not exist") unless File.exist?(public_key_file_name)
       raise ArgumentError.new("Input file \"#{input_file_name}\" does not exist") unless File.exist?(input_file_name)
 
       recipient = get_recipient(public_key_file_name)
       with_temporary_encrypt_keyring(public_key_file_name) do |keyring_file_name|
+        additional_args = []
+        additional_args += ["--cipher-algo", cipher_algo] if cipher_algo.present?
+        additional_args += ["--digest-algo", digest_algo] if digest_algo.present?
+        additional_args += ["--compress-algo", compress_algo] if compress_algo.present?
+
         run_gpg_capture(
+          *additional_args,
           '--keyring', keyring_file_name,
           '--output', output_file_name,
           '--encrypt',
