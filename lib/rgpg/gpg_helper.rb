@@ -62,7 +62,7 @@ module Rgpg
         ]
         args.unshift '--passphrase', passphrase unless passphrase.nil?
         run_gpg_capture(*args).tap do |capture|
-          if signing_key_id && signing_key_id.cascmp(capture[/(?<=^\[GNUPG:\] VALIDSIG )\h+/].to_s) != 0
+          if signing_key_id && signing_key_id.casecmp(capture[/(?<=^\[GNUPG:\] VALIDSIG )\h+/].to_s) != 0
             raise ArgumentError.new("Input not signed with expected signing key (#{signing_key_id})")
           end
         end
