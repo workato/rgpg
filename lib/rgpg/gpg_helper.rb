@@ -47,17 +47,25 @@ module Rgpg
       raise ArgumentError.new("Input file \"#{input_file_name}\" does not exist") unless File.exist?(input_file_name)
 
       recipient = get_recipient(private_key_file_name)
-      with_temporary_decrypt_keyrings(private_key_file_name, signing_key_file_name) do |keyring_file_name, secret_keyring_file_name|
-        args = '--keyring', keyring_file_name,
-               '--secret-keyring', secret_keyring_file_name,
-               '--output', output_file_name,
-               '--decrypt',
-               '--yes',
-               '--trust-model', 'always',
-               '--no-tty',
-               input_file_name
+      with_temporary_decrypt_keyrings(private_key_file_name, signing_key_file_name) do |keyring_file_name, secret_keyring_file_name, signing_key_id|
+        args = [
+          '--quiet',
+          '--status-fd', '1',
+          '--keyring', keyring_file_name,
+          '--secret-keyring', secret_keyring_file_name,
+          '--output', output_file_name,
+          '--decrypt',
+          '--yes',
+          '--trust-model', 'always',
+          '--no-tty',
+          input_file_name
+        ]
         args.unshift '--passphrase', passphrase unless passphrase.nil?
-        run_gpg_capture(*args)
+        run_gpg_capture(*args).tap do |capture|
+          if signing_key_id && signing_key_id.cascmp(capture[/(?<=^\[GNUPG:\] VALIDSIG )\h+/].to_s) != 0
+            raise ArgumentError.new("Input not signed with expected signing key (#{signing_key_id})")
+          end
+        end
       end
     end
 
